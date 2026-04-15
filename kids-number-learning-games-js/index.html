@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kids Learning Games 🎮</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Fredoka', sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #9face6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #2d3436;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      color: #ffffff;
+      text-shadow: 2px 3px 0 rgba(0,0,0,0.2);
+    }
+
+    p {
+      color: #f1f2f6;
+      margin-bottom: 40px;
+      font-size: 1.2rem;
+    }
+
+    .container {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .card {
+      background: white;
+      border-radius: 25px;
+      padding: 30px;
+      width: 260px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.03);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    }
+
+    .emoji {
+      font-size: 4rem;
+      margin-bottom: 15px;
+    }
+
+    .title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .desc {
+      font-size: 1rem;
+      color: #636e72;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 10px;
+      font-size: 0.9rem;
+      color: #ffffff;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🎮 Kids Learning Games</h1>
+  <p>Fun + Learning for Kids (Age 4–7)</p>
+
+  <div class="container">
+
+    <!-- Game 1 -->
+    <a href="o-n-e drag and drop game.html">
+      <div class="card">
+        <div class="emoji">⌨️</div>
+        <div class="title">Keyboard Game</div>
+        <div class="desc">Press correct letters to spell numbers</div>
+      </div>
+    </a>
+
+    <!-- Game 2 -->
+    <a href="o-n-e find the word.html">
+      <div class="card">
+        <div class="emoji">🧩</div>
+        <div class="title">Drag & Drop</div>
+        <div class="desc">Arrange letters to form the correct word</div>
+      </div>
+    </a>
+
+  </div>
+
+  <footer>
+    Made with ❤️ for kids learning
+  </footer>
+
+</body>
+</html>
