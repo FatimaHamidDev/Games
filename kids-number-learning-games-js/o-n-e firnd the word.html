@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Number Explorer</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --text: #ffffff;
+            --accent: #4834d4;
+            --success: #6ab04c;
+            --hint: #f0932b;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--bg);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        /* Top Progress Indicator */
+        #progress {
+            position: absolute;
+            top: 40px;
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            color: #95afc0;
+        }
+
+        /* The Big Number */
+        #digit-display {
+            font-size: 10rem;
+            margin: 0;
+            color: var(--hint);
+            text-shadow: 0 0 20px rgba(240, 147, 43, 0.5);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* The Slots for the word */
+        .word-container {
+            display: flex;
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .letter-slot {
+            width: 90px;
+            height: 110px;
+            border-bottom: 8px solid #535c68;
+            font-size: 5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .letter-slot.active {
+            border-color: var(--hint);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .letter-slot.filled {
+            border-color: var(--success);
+            color: var(--success);
+            animation: hit 0.3s ease;
+        }
+
+        @keyframes hit {
+            0% { transform: scale(1.5); }
+            100% { transform: scale(1); }
+        }
+
+        /* Keyboard Hint Box */
+        #hint-box {
+            background: #30336b;
+            padding: 20px 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #hint-box p { margin: 0; font-size: 1.2rem; color: #dff9fb; }
+        #target-key {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #ffbe0b;
+            display: block;
+        }
+
+        /* Control Buttons */
+        .controls {
+            margin-top: 50px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:active { transform: scale(0.95); }
+
+        .btn-repeat { background: #eb4d4b; color: white; }
+        .btn-next { background: #6ab04c; color: white; display: none; }
+        .btn-next.show { display: flex; animation: slideIn 0.5s ease forwards; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="progress">LEVEL 1 OF 5</div>
+    
+    <h1 id="digit-display">1</h1>
+
+    <div class="word-container" id="word-box">
+        <!-- Slots injected by JS -->
+    </div>
+
+    <div id="hint-box">
+        <p>FIND THIS KEY:</p>
+        <span id="target-key">O</span>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-repeat" onclick="repeatLevel()">🔄 REPEAT</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextLevel()">NEXT NUMBER ➔</button>
+    </div>
+
+    <script>
+        const gameData = [
+            { digit: 1, word: "ONE" },
+            { digit: 2, word: "TWO" },
+            { digit: 3, word: "THREE" },
+            { digit: 4, word: "FOUR" },
+            { digit: 5, word: "FIVE" }
+        ];
+
+        let currentLevel = 0;
+        let currentLetterIndex = 0;
+        let isLevelComplete = false;
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 0.8;
+            msg.pitch = 1.2;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function initLevel() {
+            const data = gameData[currentLevel];
+            currentLetterIndex = 0;
+            isLevelComplete = false;
+
+            // UI Updates
+            document.getElementById('progress').textContent = `NUMBER ${currentLevel + 1} OF 5`;
+            document.getElementById('digit-display').textContent = data.digit;
+            document.getElementById('next-btn').classList.remove('show');
+            
+            const wordBox = document.getElementById('word-box');
+            wordBox.innerHTML = '';
+            
+            data.word.split('').forEach((char, i) => {
+                const slot = document.createElement('div');
+                slot.className = 'letter-slot';
+                slot.id = `slot-${i}`;
+                wordBox.appendChild(slot);
+            });
+
+            updateHint();
+            speak(`Let's learn number ${data.digit}. It is spelled ${data.word}. Find the letter ${data.word[0]}`);
+        }
+
+        function updateHint() {
+            const data = gameData[currentLevel];
+            const targetChar = data.word[currentLetterIndex];
+            
+            // Highlight current slot
+            document.querySelectorAll('.letter-slot').forEach(s => s.classList.remove('active'));
+            const activeSlot = document.getElementById(`slot-${currentLetterIndex}`);
+            if (activeSlot) activeSlot.classList.add('active');
+
+            // Update huge letter hint
+            document.getElementById('target-key').textContent = targetChar;
+        }
+
+        // KEYBOARD EVENT LISTENER
+        document.addEventListener('keydown', (e) => {
+            if (isLevelComplete) return;
+
+            const pressedKey = e.key.toUpperCase();
+            const data = gameData[currentLevel];
+            const targetKey = data.word[currentLetterIndex];
+
+            if (pressedKey === targetKey) {
+                // Correct Key
+                const slot = document.getElementById(`slot-${currentLetterIndex}`);
+                slot.textContent = targetKey;
+                slot.classList.add('filled');
+                
+                currentLetterIndex++;
+                
+                if (currentLetterIndex >= data.word.length) {
+                    handleWin();
+                } else {
+                    speak(targetKey + ". Now find " + data.word[currentLetterIndex]);
+                    updateHint();
+                }
+            } else {
+                // Wrong Key (ignore system keys like Shift/Alt)
+                if (pressedKey.length === 1) {
+                    speak("Try again. Find " + targetKey);
+                }
+            }
+        });
+
+        function handleWin() {
+            isLevelComplete = true;
+            const data = gameData[currentLevel];
+            
+            // Visual celebration
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            document.getElementById('next-btn').classList.add('show');
+            document.getElementById('target-key').textContent = "⭐";
+            
+            speak(`${data.word}! You spelled ${data.digit}! Great job.`);
+        }
+
+        function nextLevel() {
+            if (currentLevel < gameData.length - 1) {
+                currentLevel++;
+                initLevel();
+            } else {
+                // Game Finished
+                currentLevel = 0;
+                initLevel();
+                speak("You finished all the numbers! Let's play again!");
+            }
+        }
+
+        function repeatLevel() {
+            initLevel();
+        }
+
+        // Start the game
+        window.onload = initLevel;
+    </script>
+</body>
+</html>
